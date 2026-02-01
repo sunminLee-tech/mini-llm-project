@@ -1,15 +1,14 @@
 package com.sun.llm.entity.chatbot;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+@Getter
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class ChatbotEntity {
 
-    String clientId;
-    String message;
+    private String clientId;
+    private String message;
 }

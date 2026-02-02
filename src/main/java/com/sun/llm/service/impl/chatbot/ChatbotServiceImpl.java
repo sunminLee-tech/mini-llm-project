@@ -2,6 +2,7 @@ package com.sun.llm.service.impl.chatbot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.llm.common.ApiResponse;
+import com.sun.llm.entity.chatbot.ChatResponse;
 import com.sun.llm.entity.chatbot.ChatbotEntity;
 import com.sun.llm.service.chatbot.ChatbotService;
 import lombok.extern.slf4j.Slf4j;
@@ -45,15 +46,15 @@ public class ChatbotServiceImpl implements ChatbotService {
             String jsonBody = objectMapper.writeValueAsString(request);
             log.info("Sending JSON: {}", jsonBody);
 
-            String response = restClient.post()
+            ChatResponse response = restClient.post()
                     .uri("/chat")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .body(jsonBody)
                     .retrieve()
-                    .body(String.class);
+                    .body(ChatResponse.class);
 
-            return ApiResponse.success(response);
+            return ApiResponse.success(response.getMessage());
         } catch (Exception e) {
             log.error("Error calling chatbot: ", e);
             return ApiResponse.failure("Failed to call chatbot");

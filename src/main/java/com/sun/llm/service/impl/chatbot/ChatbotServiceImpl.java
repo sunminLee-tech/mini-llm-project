@@ -40,9 +40,11 @@ public class ChatbotServiceImpl implements ChatbotService {
 //    }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+//    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> askChatbot(ChatbotEntity request) {
         try {
+            //todo 질문 이력 추가 - clientId 존재 체크
+            request.setNew(true);
             String jsonBody = objectMapper.writeValueAsString(request);
             log.info("Sending JSON: {}", jsonBody);
 
@@ -54,6 +56,8 @@ public class ChatbotServiceImpl implements ChatbotService {
                     .retrieve()
                     .body(ChatResponse.class);
 
+            //todo 질문 응답  추가 - user에 타이틀 업데이트
+            log.info("response =========================>{}", response);
             return ApiResponse.success(response.getMessage());
         } catch (Exception e) {
             log.error("Error calling chatbot: ", e);
@@ -61,4 +65,3 @@ public class ChatbotServiceImpl implements ChatbotService {
         }
     }
 }
-

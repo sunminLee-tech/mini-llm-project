@@ -7,8 +7,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Setter
 public class ChatbotEntity {
 
     private String clientId;
     private String message;
+    private boolean isNew;
 }

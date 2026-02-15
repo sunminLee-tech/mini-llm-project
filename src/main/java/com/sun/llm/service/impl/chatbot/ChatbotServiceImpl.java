@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.llm.common.ApiResponse;
 import com.sun.llm.entity.chatbot.ChatResponse;
 import com.sun.llm.entity.chatbot.ChatbotEntity;
+import com.sun.llm.entity.chatbot.MainMsgMgmtEntity;
+import com.sun.llm.entity.chatbot.MsgHistEntity;
+import com.sun.llm.repository.chatbot.MainMsgMgmtRepository;
+import com.sun.llm.repository.chatbot.MsgHistRepository;
 import com.sun.llm.service.chatbot.ChatbotService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -18,9 +22,13 @@ public class ChatbotServiceImpl implements ChatbotService {
 
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
+    private final MainMsgMgmtRepository mainMsgMgmtRepository;
+    private final MsgHistRepository msgHistRepository;
 
-    public ChatbotServiceImpl(ObjectMapper objectMapper) {
+    public ChatbotServiceImpl(ObjectMapper objectMapper, MainMsgMgmtRepository mainMsgMgmtRepository, MsgHistRepository msgHistRepository) {
         this.objectMapper = objectMapper;
+        this.mainMsgMgmtRepository = mainMsgMgmtRepository;
+        this.msgHistRepository = msgHistRepository;
         this.restClient = RestClient.builder()
                 .baseUrl("http://localhost:8000")
                 .requestFactory(new HttpComponentsClientHttpRequestFactory())
@@ -40,11 +48,23 @@ public class ChatbotServiceImpl implements ChatbotService {
 //    }
 
     @Override
-//    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public ApiResponse<String> askChatbot(ChatbotEntity request) {
         try {
-            //todo 질문 이력 추가 - clientId 존재 체크
-            request.setNew(true);
+
+            if (!mainMsgMgmtRepository.existsById(request.getClientId())) {
+                MainMsgMgmtEntity mainMsgMgmtEntity = MainMsgMgmtEntity.builder()
+                        .clientId(request.getClientId())
+                        .build();
+                mainMsgMgmtRepository.save(mainMsgMgmtEntity);
+                request.setNew(true);
+            }
+
+            MsgHistEntity msgHistEntity = MsgHistEntity.createUserMessage(request.getClientId(), request.getMessage());
+
+            MsgHistEntity savedMsgHist = msgHistRepository.save(msgHistEntity);
+            log.info("savedMsgHist seq: {}", savedMsgHist.getSeq());
+
             String jsonBody = objectMapper.writeValueAsString(request);
             log.info("Sending JSON: {}", jsonBody);
 
@@ -56,7 +76,17 @@ public class ChatbotServiceImpl implements ChatbotService {
                     .retrieve()
                     .body(ChatResponse.class);
 
-            //todo 질문 응답  추가 - user에 타이틀 업데이트
+            if (response == null) {
+                return ApiResponse.failure("Empty response from chatbot");
+            }
+            MsgHistEntity responseEntity = MsgHistEntity.createAssistantMessage(request.getClientId(), response.getMessage());
+            msgHistRepository.save(responseEntity);
+
+            if (request.isNew()) {
+                MainMsgMgmtEntity mainEntity = mainMsgMgmtRepository.findById(request.getClientId()).orElseThrow();
+                mainEntity.updateTitle(response.getTitle());
+            }
+
             log.info("response =========================>{}", response);
             return ApiResponse.success(response.getMessage());
         } catch (Exception e) {

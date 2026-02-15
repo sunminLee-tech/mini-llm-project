@@ -12,5 +12,5 @@ public class ChatbotEntity {
 
     private String clientId;
     private String message;
-    private boolean isNew;
+    private boolean isNew = false;
 }

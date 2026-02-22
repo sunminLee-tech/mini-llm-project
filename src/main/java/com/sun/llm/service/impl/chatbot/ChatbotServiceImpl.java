@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class ChatbotServiceImpl implements ChatbotService {
@@ -93,5 +95,17 @@ public class ChatbotServiceImpl implements ChatbotService {
             log.error("Error calling chatbot: ", e);
             return ApiResponse.failure("Failed to call chatbot");
         }
+    }
+
+    @Override
+    public ApiResponse<List<MainMsgMgmtEntity>> historyChatbot() {
+        List<MainMsgMgmtEntity> list = mainMsgMgmtRepository.findAllByOrderByCreatedAtDesc();
+        return ApiResponse.success(list);
+    }
+
+    @Override
+    public ApiResponse<List<MsgHistEntity>> inquiryMsgOne(String clientId) {
+        List<MsgHistEntity> list = msgHistRepository.findAllByClientIdOrderByCreatedAtAsc(clientId);
+        return ApiResponse.success(list);
     }
 }

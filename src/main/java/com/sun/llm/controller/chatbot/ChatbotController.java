@@ -3,14 +3,15 @@ package com.sun.llm.controller.chatbot;
 import com.sun.llm.common.ApiResponse;
 import com.sun.llm.dto.chatbot.request.ChatbotRequestDTO;
 import com.sun.llm.entity.chatbot.ChatResponse;
+import com.sun.llm.entity.chatbot.MainMsgMgmtEntity;
+import com.sun.llm.entity.chatbot.MsgHistEntity;
 import com.sun.llm.service.chatbot.ChatbotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequestMapping("/api/chatbot")
 @RestController
@@ -23,6 +24,18 @@ public class ChatbotController {
     @PostMapping
     public ResponseEntity<ApiResponse<String>> askChatbot(@RequestBody ChatbotRequestDTO request) {
         ApiResponse<String> response = chatbotService.askChatbot(request.from());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<ApiResponse<List<MainMsgMgmtEntity>>> historyChatbot() {
+        ApiResponse<List<MainMsgMgmtEntity>> response = chatbotService.historyChatbot();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/messages")
+    public ResponseEntity<ApiResponse<List<MsgHistEntity>>> inquiryMsgOne(@RequestParam(name="client_id") String clientId) {
+        ApiResponse<List<MsgHistEntity>> response = chatbotService.inquiryMsgOne(clientId);
         return ResponseEntity.ok(response);
     }
 

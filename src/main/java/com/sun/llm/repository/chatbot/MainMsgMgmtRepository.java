@@ -8,4 +8,6 @@ import java.util.List;
 public interface MainMsgMgmtRepository extends JpaRepository<MainMsgMgmtEntity, String> {
 
     List<MainMsgMgmtEntity> findAllByOrderByCreatedAtDesc();
+
+    void deleteByClientId(String clientId);
 }

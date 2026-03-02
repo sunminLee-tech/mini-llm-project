@@ -8,4 +8,6 @@ import java.util.List;
 public interface MsgHistRepository extends JpaRepository<MsgHistEntity, Long> {
 
     List<MsgHistEntity> findAllByClientIdOrderByCreatedAtAsc(String clientId);
+
+    void deleteByClientId(String clientId);
 }

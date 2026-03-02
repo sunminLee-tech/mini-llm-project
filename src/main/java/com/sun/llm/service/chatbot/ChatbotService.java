@@ -13,4 +13,6 @@ public interface ChatbotService {
     ApiResponse<List<MainMsgMgmtEntity>> historyChatbot();
 
     ApiResponse<List<MsgHistEntity>> inquiryMsgOne(String clientId);
+
+    ApiResponse<List<MainMsgMgmtEntity>> delHistoryChatbot(String clientId);
 }

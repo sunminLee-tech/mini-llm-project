@@ -39,5 +39,11 @@ public class ChatbotController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/history/{clientId}")
+    public ResponseEntity<ApiResponse> delHistoryChatbot(@PathVariable String clientId) {
+        ApiResponse<List<MainMsgMgmtEntity>> response = chatbotService.delHistoryChatbot(clientId);
+        return ResponseEntity.ok(response);
+    }
+
 
 }

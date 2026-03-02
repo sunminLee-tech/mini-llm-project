@@ -98,14 +98,24 @@ public class ChatbotServiceImpl implements ChatbotService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<List<MainMsgMgmtEntity>> historyChatbot() {
         List<MainMsgMgmtEntity> list = mainMsgMgmtRepository.findAllByOrderByCreatedAtDesc();
         return ApiResponse.success(list);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ApiResponse<List<MsgHistEntity>> inquiryMsgOne(String clientId) {
         List<MsgHistEntity> list = msgHistRepository.findAllByClientIdOrderByCreatedAtAsc(clientId);
         return ApiResponse.success(list);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ApiResponse<List<MainMsgMgmtEntity>> delHistoryChatbot(String clientId) {
+        msgHistRepository.deleteByClientId(clientId);
+        mainMsgMgmtRepository.deleteByClientId(clientId);
+        return null;
     }
 }
